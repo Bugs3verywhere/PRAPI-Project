@@ -1,0 +1,12 @@
+# Visual Studio's local cache and settings
+.vs/
+
+# Compiled output
+Debug/
+Release/
+x64/
+x86/
+
+# Visual Studio user-specific files
+*.user
+*.suo
