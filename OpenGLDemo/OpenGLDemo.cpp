@@ -1,12 +1,51 @@
 #include <iostream>
-
+#include <fstream> //reads files
+#include <string>
+#include <sstream>
 #define GLEW_STATIC
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-//Windows prop
+struct ShaderProgramSource
+{
+	std::string VertexSource;
+	std::string FragmentSource;
+};
+
 const GLint WIDTH = 800, HEIGHT = 600;
+
+static ShaderProgramSource ParseShader(const std::string& filepath)
+{
+	std::ifstream stream(filepath); //input file path 
+
+	enum class ShaderType
+	{
+		NONE = -1,
+		VERTEX = 0,
+		FRAGMENT = 1
+	}; //defining the different shader types
+
+	std::string line;
+	std::stringstream ss[2];
+	ShaderType type = ShaderType::NONE;
+	while (getline(stream, line))
+	{
+		if (line.find("#shader") != std::string::npos)
+		{
+			if (line.find("vertex") != std::string::npos)
+				type = ShaderType::VERTEX; //tells us we are dealing with a vertex shader
+			else if (line.find("fragment") != std::string::npos)
+				type = ShaderType::FRAGMENT; //same as above but for fragment
+			
+		}
+		else
+		{
+			ss[(int)type] << line << '\n';
+		}
+	}
+
+	return { ss[0].str(), ss[1].str() };
+}
 
 static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
@@ -85,11 +124,11 @@ int main() {
 	// Initial coordinates setting
 	glViewport(0, 0, screenWidth, screenHeight);
 
-	float positions[6] = {
-		-0.5f, -0.5f,
-		 0.5f, -0.5f,
-		 0.0f, 0.5f,
-	}; //triangle vertex positions, x first y second
+	float verticesData[] = {
+		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,
+		 0.0f, 0.5f,	0.0f, 0.0f, 1.0f
+	}; //triangle vertex positions and colour data, x first y second then rbg data
 
 	unsigned int vao;
 	glGenVertexArrays(1, &vao);
@@ -98,32 +137,18 @@ int main() {
 	unsigned int buffer; //place to store the buffer
 	glGenBuffers(1, &buffer); //create 1 buffer
 	glBindBuffer(GL_ARRAY_BUFFER, buffer); //bind the buffer to the array buffer, what is assigned to the bind will be drawn
-	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);  //send the data to the bufferW
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData), verticesData, GL_STATIC_DRAW);  //send the vertices data to the buffer
 
-	glEnableVertexAttribArray(0); //enable the vertex attribute array
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	glEnableVertexAttribArray(0); //enable the vertex position attribute array
+	glEnableVertexAttribArray(1); //enable the colour array
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(2 * sizeof(float)));
 
-	std::string vertexShader =
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) in vec4 position;\n"
-		"\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = position;\n"
-		"}\n";
+	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader"); //tells the shader command what shader file to use
+	//std::cout << source.VertexSource << std::endl;
+	//std::cout << source.FragmentSource << std::endl;
 
-	std::string fragmentShader =
-		"#version 330 core\n"
-		"\n"
-		"out vec4 color;\n"
-		"\n"
-		"void main()\n"
-		"{\n"
-		"	color = vec4(0.5, 0.0, 1.0, 1.0);\n"
-		"}\n";
-
-	unsigned int shader = CreateShader(vertexShader, fragmentShader);
+	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
 
 	//window main loop
@@ -138,9 +163,8 @@ int main() {
 		glfwPollEvents();
 	}
 
-
+	glDeleteProgram(shader);
 	glfwTerminate();
-
 	return EXIT_SUCCESS;
 }
 
