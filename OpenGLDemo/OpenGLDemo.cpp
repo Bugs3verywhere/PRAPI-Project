@@ -208,8 +208,18 @@ int main() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//basic movement
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.01f));
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.01f));
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			projection = glm::rotate(projection, glm::radians(0.1f), glm::vec3(0.0, 1.0, 0.0));
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+			projection = glm::rotate(projection, glm::radians(-0.1f), glm::vec3(0.0, 1.0, 0.0));
+
 		trans = glm::mat4(1.0f); //reset the transform matrix
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 1.0));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
 		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 		unsigned int viewLoc = glGetUniformLocation(shader, "view");
