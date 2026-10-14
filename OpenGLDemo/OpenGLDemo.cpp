@@ -127,15 +127,38 @@ int main() {
 	glViewport(0, 0, screenWidth, screenHeight);
 
 	float verticesData[] = {
-		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,
-		 -0.5f, 0.5f,	0.0f, 0.0f, 1.0f,
-		 0.5f, 0.5f,	1.0f, 1.0f, 1.0f,
-	}; //triangle vertex positions and colour data, x first y second then rbg data
+		//square front face vertices
+			-0.5f, -0.5f, -0.5f,	1.0f, 0.0f, 0.0f,
+			0.5f, -0.5f, -0.5f,		0.0f, 1.0f, 0.0f,
+			-0.5f, 0.5f, -0.5f, 	0.0f, 0.0f, 1.0f,
+			0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 0.0f,
+
+		//square back face vertices
+			-0.5f, -0.5f, 0.5f,		1.0f, 0.0f, 0.0f,
+			0.5f, -0.5f, 0.5f,		0.0f, 1.0f, 0.0f,
+			-0.5f, 0.5f, 0.5f,		0.0f, 0.0f, 1.0f,
+			0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f
+	}; //cube vertex positions and colour data, x first y second then rbg data
 
 	unsigned int indices[] = {
-		0, 1, 2,
-		1, 2, 3
+
+		0, 2, 3,
+		0, 3, 1, //front
+
+		4, 5, 7,
+		4, 7, 6, //back
+
+		0, 4, 6,
+		0, 6, 2, //left
+
+		1, 3, 7,
+		1, 7, 5, //right
+
+		2, 6, 7,
+		2, 7, 3, //top
+
+		0, 1, 5,
+		0, 5, 4, //bottom
 	};
 
 	unsigned int vao;
@@ -155,8 +178,8 @@ int main() {
 
 	glEnableVertexAttribArray(0); //enable the vertex position attribute array
 	glEnableVertexAttribArray(1); //enable the colour array
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(2 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float)));
 
 	// glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f); //put in our inital vertex position as a vector
 	// glm::mat4 trans = glm::mat4(1.0f); //define a matrix to hold a transformation of 1
@@ -168,25 +191,34 @@ int main() {
 	//std::cout << source.VertexSource << std::endl;
 	//std::cout << source.FragmentSource << std::endl;
 
-	glm::mat4 trans = glm::mat4(1.0f);
+	glm::mat4 trans = glm::mat4(1.0f); //makes a matrix that we have named transform
+	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); //creates a "camera" by pushing the scene back by 3 
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), float(screenWidth) / float(screenHeight), 0.1f, 100.0f); //creates a projection with a 45 degree FOV, the size of the window and clipping planes of 0.1 to 100
 
 
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
 
 	//window main loop
 	while (!glfwWindowShouldClose(window)) {
 
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //draw triangles using the 6 indices starting at element 0 of the array
-
-		trans = glm::mat4(1.0f);
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+		trans = glm::mat4(1.0f); //reset the transform matrix
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 1.0));
 		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		unsigned int viewLoc = glGetUniformLocation(shader, "view");
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		unsigned int projLoc = glGetUniformLocation(shader, "projection");
+		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0); //draw triangles using the 36 indices starting at element 0 of the array
 
 		glfwSwapBuffers(window); 
 
