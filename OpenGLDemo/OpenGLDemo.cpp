@@ -5,6 +5,9 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 struct ShaderProgramSource
 {
@@ -35,8 +38,7 @@ static ShaderProgramSource ParseShader(const std::string& filepath)
 			if (line.find("vertex") != std::string::npos)
 				type = ShaderType::VERTEX; //tells us we are dealing with a vertex shader
 			else if (line.find("fragment") != std::string::npos)
-				type = ShaderType::FRAGMENT; //same as above but for fragment
-			
+				type = ShaderType::FRAGMENT; //same as above but for fragmen
 		}
 		else
 		{
@@ -144,12 +146,22 @@ int main() {
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(2 * sizeof(float)));
 
+	// glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f); //put in our inital vertex position as a vector
+	// glm::mat4 trans = glm::mat4(1.0f); //define a matrix to hold a transformation of 1
+	// trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f)); //translate the matrix by 1 in the x and y direction
+	// vec = trans * vec; //perform the transformation
+	// std::cout << vec.x << vec.y << vec.z << std::endl; // output results of transformation, should be 2 1 0
+
 	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader"); //tells the shader command what shader file to use
 	//std::cout << source.VertexSource << std::endl;
 	//std::cout << source.FragmentSource << std::endl;
 
+	glm::mat4 trans = glm::mat4(1.0f);
+
+
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
+
 
 	//window main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -157,6 +169,11 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3); //draw 3 vertices starting from index 0
+
+		trans = glm::mat4(1.0f);
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 0.0));
+		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		glfwSwapBuffers(window); 
 
