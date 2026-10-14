@@ -129,17 +129,29 @@ int main() {
 	float verticesData[] = {
 		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,
-		 0.0f, 0.5f,	0.0f, 0.0f, 1.0f
+		 -0.5f, 0.5f,	0.0f, 0.0f, 1.0f,
+		 0.5f, 0.5f,	1.0f, 1.0f, 1.0f,
 	}; //triangle vertex positions and colour data, x first y second then rbg data
+
+	unsigned int indices[] = {
+		0, 1, 2,
+		1, 2, 3
+	};
 
 	unsigned int vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	unsigned int buffer; //place to store the buffer
-	glGenBuffers(1, &buffer); //create 1 buffer
-	glBindBuffer(GL_ARRAY_BUFFER, buffer); //bind the buffer to the array buffer, what is assigned to the bind will be drawn
+	unsigned int vertexBuffer; //place to store the buffer
+	glGenBuffers(1, &vertexBuffer); //create 1 buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer); //bind the buffer to the array buffer, what is assigned to the bind will be drawn
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData), verticesData, GL_STATIC_DRAW);  //send the vertices data to the buffer
+
+	unsigned int elementBuffer; //same thing but for indices
+	glGenBuffers(1, &elementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
 	glEnableVertexAttribArray(0); //enable the vertex position attribute array
 	glEnableVertexAttribArray(1); //enable the colour array
@@ -168,10 +180,11 @@ int main() {
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3); //draw 3 vertices starting from index 0
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //draw triangles using the 6 indices starting at element 0 of the array
 
 		trans = glm::mat4(1.0f);
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 1.0, 0.0));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
 		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 

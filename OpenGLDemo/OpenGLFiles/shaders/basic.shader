@@ -1,7 +1,7 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec2 position; //vertices first attribute is position
+layout(location = 0) in vec3 position; //vertices first attribute is position
 layout(location = 1) in vec3 vertexColour; //vertices second attribute is colour
 
 out vec3 colour;
@@ -9,7 +9,7 @@ uniform mat4 transform;
 
 void main()
 {
-    gl_Position = transform * vec4(position, 0.0, 1.0);
+    gl_Position = transform * vec4(position, 1.0);
     colour = vertexColour; // take vertices colour attribute and assign it to a vec3 variable
 }
 
