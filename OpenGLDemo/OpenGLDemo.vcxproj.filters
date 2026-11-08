@@ -27,5 +27,8 @@
     <ClCompile Include="OpenGLFiles\cpp\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OpenGLFiles\cpp\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

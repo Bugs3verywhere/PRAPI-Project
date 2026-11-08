@@ -8,12 +8,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <curl/curl.h>
+#include <calceph.h>
+#include <SpiceUsr.h>
+#include <supernovas.h>
 
 #include "OpenGLFiles/cpp/Shader.h"
 #include "OpenGLFiles/cpp/Renderer.h"
 #include "OpenGLFiles/cpp/Window.h"
+#include "OpenGLFiles/cpp/Camera.h"
 
 int main() {
+
 	glfwInit();
 
 	Window window(800, 600, "Test Test");
@@ -74,6 +80,7 @@ int main() {
 	};
 
 	Renderer renderer;
+	Camera camera(glm::vec3(0, 0, 5));
 
 	renderer.Initialize(verticesData, sizeof(verticesData), indices, sizeof(indices));
 	
@@ -81,9 +88,13 @@ int main() {
 	//std::cout << source.VertexSource << std::endl;
 	//std::cout << source.FragmentSource << std::endl;
 
-	glm::mat4 trans = glm::mat4(1.0f); //makes a matrix that we have named transform
+	glm::mat4 trans = glm::mat4(1.0f);
+
+	glm::vec3 position = glm::vec3(0, 0, 5);
+
 	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); //creates a "camera" by pushing the scene back by 3 
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), float(screenWidth) / float(screenHeight), 0.1f, 100.0f); //creates a projection with a 45 degree FOV, the size of the window and clipping planes of 0.1 to 100
+
+	glm::mat4 projection = glm::perspective(glm::radians(camera.GetFoV()), float(screenWidth) / float(screenHeight), 0.1f, 100.0f); //creates a projection with a 45 degree FOV, the size of the window and clipping planes of 0.1 to 100
 
 
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
@@ -100,12 +111,18 @@ int main() {
 
 		trans = glm::mat4(1.0f); //reset the transform matrix
 		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+
 		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
 		unsigned int viewLoc = glGetUniformLocation(shader, "view");
-		glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		camera.UpdateCamera(window.GetNativeWindow(), screenWidth, screenHeight);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+
 		unsigned int projLoc = glGetUniformLocation(shader, "projection");
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+
 
 		renderer.Draw(36);
 		window.SwapBuffers();
