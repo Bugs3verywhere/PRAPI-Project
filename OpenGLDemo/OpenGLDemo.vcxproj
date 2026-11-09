@@ -107,8 +107,9 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\cspice\lib;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\curl-8.23.0\lib;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glfw-3.5.1.bin.WIN64\lib-vc2022;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glew-2.3.1\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\oliwo\vcpkg\installed\x64-windows\lib;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\cspice\lib;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\curl-8.23.0\lib;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glfw-3.5.1.bin.WIN64\lib-vc2022;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glew-2.3.1\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;solsys-calceph.lib;calceph.lib;supernovas.lib
+;supernovas++.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

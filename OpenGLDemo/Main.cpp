@@ -1,8 +1,9 @@
+#define GLEW_STATIC
+
 #include <iostream>
-#include <fstream> //reads files
+#include <fstream>
 #include <string>
 #include <sstream>
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -10,7 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <curl/curl.h>
 #include <calceph.h>
-#include <SpiceUsr.h>
+#include <novas-calceph.h>
 #include <supernovas.h>
 
 #include "OpenGLFiles/cpp/Shader.h"
@@ -18,7 +19,34 @@
 #include "OpenGLFiles/cpp/Window.h"
 #include "OpenGLFiles/cpp/Camera.h"
 
+using namespace supernovas;
+using namespace std;
+
 int main() {
+
+	t_calcephbin* ephemeris =
+		calceph_open("OpenGLFiles/objectephemeris/de440s.bsp");
+
+	calceph_prefetch(ephemeris);
+
+	int status = novas_use_calceph_planets(ephemeris);
+
+	std::cout << "CALCEPH registration: " << status << '\n';
+
+	auto planetSource = Planet::jupiter();
+	Site site = Site::from_GPS(-1.087 * Unit::deg, 50.805 * Unit::deg, 60.0 * Unit::m);
+	EOP eop(37, 0.6447 * Unit::s, 103.2 * Unit::mas, 211.3 * Unit::mas);
+	auto obs = site.to_observer(eop);
+	Time obs_time = Time::now(eop);
+	Frame frame = obs.reduced_accuracy_frame_at(obs_time);
+	Apparent app = planetSource.apparent_in(frame);
+	Horizontal hor = app.to_horizontal();
+
+	double planetAltitude = hor.elevation().deg();
+	double planetAzimuth = hor.azimuth().deg();
+
+	cout << planetAzimuth << endl;
+	cout << planetAltitude << endl;
 
 	glfwInit();
 
@@ -84,15 +112,11 @@ int main() {
 
 	renderer.Initialize(verticesData, sizeof(verticesData), indices, sizeof(indices));
 	
-	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader"); //tells the shader command what shader file to use
-	//std::cout << source.VertexSource << std::endl;
-	//std::cout << source.FragmentSource << std::endl;
+	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader");
 
-	glm::mat4 trans = glm::mat4(1.0f);
+	glm::mat4 trans;
 
 	glm::vec3 position = glm::vec3(0, 0, 5);
-
-	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); //creates a "camera" by pushing the scene back by 3 
 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.GetFoV()), float(screenWidth) / float(screenHeight), 0.1f, 100.0f); //creates a projection with a 45 degree FOV, the size of the window and clipping planes of 0.1 to 100
 
@@ -122,9 +146,8 @@ int main() {
 		unsigned int projLoc = glGetUniformLocation(shader, "projection");
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-
-
 		renderer.Draw(36);
+
 		window.SwapBuffers();
 		window.PollEvents();
 	}
