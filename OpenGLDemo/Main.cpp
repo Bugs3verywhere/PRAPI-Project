@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <list>
 #include <sstream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -22,6 +23,50 @@
 using namespace supernovas;
 using namespace std;
 
+
+list<string> objectList = {
+	"Sun",
+	"Mercury",
+	"Venus",
+	"Moon",
+	"Mars",
+	"Jupiter",
+	"Saturn",
+	"Uranus",
+	"Neptune",
+	"Pluto"
+};
+
+const Planet getObjectName(string objectName) {
+	if (objectName == "Sun")
+		return Planet::sun();
+	if (objectName == "Mercury")
+		return Planet::mercury();
+	if (objectName == "Venus")
+		return Planet::venus();
+	if (objectName == "Moon")
+		return Planet::moon();
+	if (objectName == "Mars")
+		return Planet::mars();
+	if (objectName == "Jupiter")
+		return Planet::jupiter();
+	if (objectName == "Saturn")
+		return Planet::saturn();
+	if (objectName == "Uranus")
+		return Planet::uranus();
+	if (objectName == "Neptune")
+		return Planet::neptune();
+	if (objectName == "Pluto")
+		return Planet::pluto();
+	return Planet::earth(); // returns Earth as a fallback if somehow no object is found
+}
+
+double distanceRescale(double distance)
+{
+	distance = distance / 1000000;
+	return distance;
+}
+
 int main() {
 
 	t_calcephbin* ephemeris =
@@ -31,22 +76,31 @@ int main() {
 
 	int status = novas_use_calceph_planets(ephemeris);
 
-	std::cout << "CALCEPH registration: " << status << '\n';
+	for (string objectName : objectList) {
+		auto objectSource = getObjectName(objectName);
+		Site site = Site::from_GPS(-1.087 * Unit::deg, 50.805 * Unit::deg, 60.0 * Unit::m);
+		EOP eop(37, 0.6447 * Unit::s, 103.2 * Unit::mas, 211.3 * Unit::mas);
+		auto obs = site.to_observer(eop);
+		Time obs_time = Time::now(eop);
+		Frame frame = obs.reduced_accuracy_frame_at(obs_time);
+		Apparent app = objectSource.apparent_in(frame);
+		Horizontal hor = app.to_horizontal();
+		Coordinate objectDistance = app.distance();
 
-	auto planetSource = Planet::jupiter();
-	Site site = Site::from_GPS(-1.087 * Unit::deg, 50.805 * Unit::deg, 60.0 * Unit::m);
-	EOP eop(37, 0.6447 * Unit::s, 103.2 * Unit::mas, 211.3 * Unit::mas);
-	auto obs = site.to_observer(eop);
-	Time obs_time = Time::now(eop);
-	Frame frame = obs.reduced_accuracy_frame_at(obs_time);
-	Apparent app = planetSource.apparent_in(frame);
-	Horizontal hor = app.to_horizontal();
+		double objectAltitude = hor.elevation().deg();
+		double objectAzimuth = hor.azimuth().deg();
 
-	double planetAltitude = hor.elevation().deg();
-	double planetAzimuth = hor.azimuth().deg();
+		cout << objectName << endl;
+		cout << objectAzimuth << endl;
+		cout << objectAltitude	 << endl;
+		cout << objectDistance.km() << " km" << endl;
+		cout << distanceRescale(objectDistance.km()) << " units" << endl;
+		cout << "\n";
 
-	cout << planetAzimuth << endl;
-	cout << planetAltitude << endl;
+		//z = std::sqrt((r ^ 2 * (cos(objectAzimuth)) ^ 2) / (1 + (cos(objectAzimuth)) ^ 2 * (tan(objectAltitude)) ^ 2));
+		//x = z * tan(objectAzimuth);
+		//y = z * tan(objectAltitude);
+	}
 
 	glfwInit();
 
