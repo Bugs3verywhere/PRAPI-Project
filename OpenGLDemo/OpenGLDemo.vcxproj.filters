@@ -18,19 +18,19 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLFiles\cpp\Shader.cpp">
+    <ClCompile Include="OpenGLFiles\source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLFiles\cpp\Renderer.cpp">
+    <ClCompile Include="OpenGLFiles\source\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLFiles\cpp\Window.cpp">
+    <ClCompile Include="OpenGLFiles\source\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLFiles\cpp\Camera.cpp">
+    <ClCompile Include="OpenGLFiles\source\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLFiles\cpp\Sphere.cpp">
+    <ClCompile Include="OpenGLFiles\source\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

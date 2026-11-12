@@ -16,10 +16,11 @@
 #include <supernovas.h>
 #include <vector>
 
-#include "OpenGLFiles/cpp/Shader.h"
-#include "OpenGLFiles/cpp/Renderer.h"
-#include "OpenGLFiles/cpp/Window.h"
-#include "OpenGLFiles/cpp/Camera.h"
+#include "OpenGLFiles/source/Shader.h"
+#include "OpenGLFiles/source/Renderer.h"
+#include "OpenGLFiles/source/Window.h"
+#include "OpenGLFiles/source/Camera.h"
+#include "OpenGLFiles/source/Object.h"
 
 using namespace supernovas;
 using namespace std;
@@ -42,170 +43,36 @@ unsigned int indexD;
 vector<glm::vec3> pointsVector;
 vector<unsigned int> indicesVector;
 
-struct Object
-{
-	string objectName;
-	glm::mat4 objectTransform;
-	glm::vec4 objectColour;
-};
-
-
-const Planet getObjectName(const Object& object) {
-	if (object.objectName == "Sun")
-		return Planet::sun();
-	if (object.objectName == "Mercury")
-		return Planet::mercury();
-	if (object.objectName == "Venus")
-		return Planet::venus();
-	if (object.objectName == "Moon")
-		return Planet::moon();
-	if (object.objectName == "Mars")
-		return Planet::mars();
-	if (object.objectName == "Jupiter")
-		return Planet::jupiter();
-	if (object.objectName == "Saturn")
-		return Planet::saturn();
-	if (object.objectName == "Uranus")
-		return Planet::uranus();
-	if (object.objectName == "Neptune")
-		return Planet::neptune();
-	if (object.objectName == "Pluto")
-		return Planet::pluto();
-	return Planet::earth(); // returns Earth as a fallback if somehow no object is found
-}
-
-vector<Object> renderObject;
-
-double distanceRescale(double distance)
-{
-	distance = distance / 1000000;
-	return distance;
-}
-
 int main() {
 
-	t_calcephbin* ephemeris =
-		calceph_open("OpenGLFiles/objectephemeris/de440s.bsp");
-
-	calceph_prefetch(ephemeris);
-
-	int status = novas_use_calceph_planets(ephemeris);
-
-	//Declare all planet properties
-
-	Object sun;
-	sun.objectName = "Sun";
-	sun.objectTransform = glm::mat4(1.0f); // add position
-	sun.objectTransform = glm::translate(sun.objectTransform, glm::vec3(0, 0, 1));
-	sun.objectColour = glm::vec4(1, 1, 0, 1);
-	renderObject.push_back(sun);
-
-	Object mercury;
-	mercury.objectName = "Mercury";
-	mercury.objectTransform = glm::mat4(1.0f);
-	mercury.objectTransform = glm::translate(mercury.objectTransform, glm::vec3(0, 0, 1));
-	mercury.objectTransform = glm::scale(mercury.objectTransform, glm::vec3(0.1f));
-	mercury.objectColour = glm::vec4(0.1, 0.1, 0.1, 1);
-	renderObject.push_back(mercury);
-
-	Object venus;
-	venus.objectName = "Venus";
-	venus.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	venus.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(venus);
-
-	Object moon;
-	moon.objectName = "Moon";
-	moon.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	moon.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(moon);
-
-	Object mars;
-	mars.objectName = "Mars";
-	mars.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	mars.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(mars);
-
-
-	Object jupiter;
-	jupiter.objectName = "Jupiter";
-	jupiter.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	jupiter.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(jupiter);
-
-	Object saturn;
-	saturn.objectName = "Saturn";
-	saturn.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	saturn.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(saturn);
-
-	Object uranus;
-	uranus.objectName = "Uranus";
-	uranus.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	uranus.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(uranus);
-
-	Object neptune;
-	neptune.objectName = "Neptune";
-	neptune.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	neptune.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(neptune);
-
-	Object pluto;
-	pluto.objectName = "Pluto";
-	pluto.objectTransform = glm::mat4(0.0f); // change, placeholder values
-	pluto.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
-	renderObject.push_back(pluto);
-
-	for (Object& object : renderObject) {
-		auto objectSource = getObjectName(object);
-		Site site = Site::from_GPS(-1.087 * Unit::deg, 50.805 * Unit::deg, 60.0 * Unit::m);
-		EOP eop(37, 0.6447 * Unit::s, 103.2 * Unit::mas, 211.3 * Unit::mas);
-		auto obs = site.to_observer(eop);
-		Time obs_time = Time::now(eop);
-		Frame frame = obs.reduced_accuracy_frame_at(obs_time);
-		Apparent app = objectSource.apparent_in(frame);
-		Horizontal hor = app.to_horizontal();
-		Coordinate objectDistance = app.distance();
-
-		double objectAltitude = hor.elevation().deg();
-		double objectAzimuth = hor.azimuth().deg();
-
-		cout << object.objectName << endl;
-		cout << objectAzimuth << endl;
-		cout << objectAltitude	 << endl;
-		cout << objectDistance.km() << " km" << endl;
-		cout << distanceRescale(objectDistance.km()) << " units" << endl;
-		cout << "\n";
-
-		//z = std::sqrt((r ^ 2 * (cos(objectAzimuth)) ^ 2) / (1 + (cos(objectAzimuth)) ^ 2 * (tan(objectAltitude)) ^ 2));
-		//x = z * tan(objectAzimuth);
-		//y = z * tan(objectAltitude);
-	}
-
+	
 	glfwInit();
 
-	Window window(800, 600, "Test Test");
+	Object objectHandler;
+
+	if (!objectHandler.initialiseEphemeris())
+		return EXIT_FAILURE;
+
+	vector<ObjectValues> renderObject = objectHandler.createObjects();
+	objectHandler.calculatePositions(renderObject);
+
+	Window window(1280, 720, "Test Test");
 
 	if (!window.GetNativeWindow()) {
 		return EXIT_FAILURE;
 	}
 
 	int screenWidth, screenHeight;
-	glfwGetFramebufferSize(
-		window.GetNativeWindow(),
-		&screenWidth,
-		&screenHeight
-	);
 
-	glewExperimental = GL_TRUE;
+	glfwGetFramebufferSize(window.GetNativeWindow(), &screenWidth, &screenHeight);
 
 	if (GLEW_OK != glewInit()) {
-		std::cout << "Failed to initialize GLEW" << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	glViewport(0, 0, screenWidth, screenHeight);
+
+	//Sphere point generation
 
 	for (phi = 0; phi <= 180; phi += 10)
 	{
@@ -242,19 +109,16 @@ int main() {
 	}
 
 	Renderer renderer;
-	Camera camera(glm::vec3(0, 0, 5));
-
 	renderer.Initialize(pointsVector.data(), pointsVector.size() * sizeof(glm::vec3), indicesVector.data(), indicesVector.size() * sizeof(unsigned int));
+
+	Camera camera(glm::vec3(0, 0, 5));
 	
 	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader");
-
-	glm::vec3 position = glm::vec3(0, 0, 5);
-
-	glm::mat4 projection = glm::perspective(glm::radians(camera.GetFoV()), float(screenWidth) / float(screenHeight), 0.1f, 100.0f); //creates a projection with a 45 degree FOV, the size of the window and clipping planes of 0.1 to 100
-
-
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
+
+	glm::vec3 position = glm::vec3(0, 0, 5);
+	glm::mat4 projection = glm::perspective(glm::radians(camera.GetFoV()), float(screenWidth) / float(screenHeight), 0.1f, 100.0f);
 
 	glDisable(GL_CULL_FACE);
 
@@ -275,7 +139,7 @@ int main() {
 		unsigned int planetColour = glGetUniformLocation(shader, "planetColour");
 
 
-		for (Object& currentObject : renderObject)
+		for (ObjectValues& currentObject : renderObject)
 		{
 			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(currentObject.objectTransform));
 			glUniform4fv(planetColour, 1, glm::value_ptr(currentObject.objectColour));
