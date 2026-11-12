@@ -1,24 +1,22 @@
 #include "Renderer.h"
 #include "GL/glew.h"
+#include "glm/glm.hpp"
 
-void Renderer::Initialize(const float* verticesData, std::size_t verticesSize, const unsigned int* indices, std::size_t indicesSize)
+void Renderer::Initialize(const glm::vec3* verticesData, std::size_t verticesSize, const unsigned int* indices, std::size_t indicesSize)
 {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	glGenBuffers(1, &vertexBuffer); //create 1 buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer); //bind the buffer to the array buffer, what is assigned to the bind will be drawn
+	glGenBuffers(1, &VBO); //create 1 buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); //bind the buffer to the array buffer, what is assigned to the bind will be drawn
 	glBufferData(GL_ARRAY_BUFFER, verticesSize, verticesData, GL_STATIC_DRAW);  //send the vertices data to the buffer
 
-	glGenBuffers(1, &elementBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, indices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0); //enable the vertex position attribute array
-	glEnableVertexAttribArray(1); //enable the colour array
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
 }
 
 void Renderer::Draw(unsigned int indexCount)
@@ -35,6 +33,6 @@ void Renderer::Clear()
 Renderer::~Renderer()
 {
 	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteBuffers(1, &elementBuffer);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 }

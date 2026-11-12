@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <algorithm>
 #include <cmath>
 
 Camera::Camera(glm::vec3 startPosition)
@@ -18,9 +19,16 @@ void Camera::UpdateCamera(GLFWwindow* window, int screenWidth, int screenHeight)
 	double mousePosX, mousePosY;
 
 	glfwGetCursorPos(window, &mousePosX, &mousePosY);
-	glfwSetCursorPos(window, screenWidth / 2, screenHeight / 2);
-	horizontalAngle -= mouseSpeed * float(screenWidth / 2 - mousePosX);
-	verticalAngle += mouseSpeed * float(screenHeight / 2 - mousePosY);
+	glfwSetCursorPos(window, screenWidth / 2.0, screenHeight / 2.0);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	float deltaX = float(screenWidth) / 2.0f - float(mousePosX);
+	float deltaY = float(screenHeight) / 2.0f - float(mousePosY);
+
+	horizontalAngle += mouseSpeed * deltaX;
+	verticalAngle += mouseSpeed * deltaY;
+	
+	verticalAngle = std::clamp(verticalAngle, glm::radians(-89.0f), glm::radians(89.0f));
 
 	glm::vec3 direction(
 		cos(verticalAngle) * sin(horizontalAngle),

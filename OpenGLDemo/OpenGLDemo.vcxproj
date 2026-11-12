@@ -103,6 +103,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\cspice\include;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glm-0.9.9.8\glm;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glfw-3.5.1.bin.WIN64\include;C:\Users\oliwo\OneDrive\Desktop\VS Projects\Year 2 Projects\OpenGLDemo\PRAPI Project\OpenGLDemo\OpenGLFiles\glew-2.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,6 +132,7 @@
     <ClCompile Include="OpenGLFiles\cpp\Camera.cpp" />
     <ClCompile Include="OpenGLFiles\cpp\Renderer.cpp" />
     <ClCompile Include="OpenGLFiles\cpp\Shader.cpp" />
+    <ClCompile Include="OpenGLFiles\cpp\Sphere.cpp" />
     <ClCompile Include="OpenGLFiles\cpp\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

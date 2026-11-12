@@ -14,6 +14,7 @@
 #include <calceph.h>
 #include <novas-calceph.h>
 #include <supernovas.h>
+#include <vector>
 
 #include "OpenGLFiles/cpp/Shader.h"
 #include "OpenGLFiles/cpp/Renderer.h"
@@ -23,43 +24,57 @@
 using namespace supernovas;
 using namespace std;
 
+float theta = 0;
+float phi = 0;
+float radius = 2;
+int currentRing = 0;
+int currentPoint = 0;
 
-list<string> objectList = {
-	"Sun",
-	"Mercury",
-	"Venus",
-	"Moon",
-	"Mars",
-	"Jupiter",
-	"Saturn",
-	"Uranus",
-	"Neptune",
-	"Pluto"
+float x;
+float y;
+float z;
+
+unsigned int indexA;
+unsigned int indexB;
+unsigned int indexC;
+unsigned int indexD;
+
+vector<glm::vec3> pointsVector;
+vector<unsigned int> indicesVector;
+
+struct Object
+{
+	string objectName;
+	glm::mat4 objectTransform;
+	glm::vec4 objectColour;
 };
 
-const Planet getObjectName(string objectName) {
-	if (objectName == "Sun")
+
+const Planet getObjectName(const Object& object) {
+	if (object.objectName == "Sun")
 		return Planet::sun();
-	if (objectName == "Mercury")
+	if (object.objectName == "Mercury")
 		return Planet::mercury();
-	if (objectName == "Venus")
+	if (object.objectName == "Venus")
 		return Planet::venus();
-	if (objectName == "Moon")
+	if (object.objectName == "Moon")
 		return Planet::moon();
-	if (objectName == "Mars")
+	if (object.objectName == "Mars")
 		return Planet::mars();
-	if (objectName == "Jupiter")
+	if (object.objectName == "Jupiter")
 		return Planet::jupiter();
-	if (objectName == "Saturn")
+	if (object.objectName == "Saturn")
 		return Planet::saturn();
-	if (objectName == "Uranus")
+	if (object.objectName == "Uranus")
 		return Planet::uranus();
-	if (objectName == "Neptune")
+	if (object.objectName == "Neptune")
 		return Planet::neptune();
-	if (objectName == "Pluto")
+	if (object.objectName == "Pluto")
 		return Planet::pluto();
 	return Planet::earth(); // returns Earth as a fallback if somehow no object is found
 }
+
+vector<Object> renderObject;
 
 double distanceRescale(double distance)
 {
@@ -76,8 +91,74 @@ int main() {
 
 	int status = novas_use_calceph_planets(ephemeris);
 
-	for (string objectName : objectList) {
-		auto objectSource = getObjectName(objectName);
+	//Declare all planet properties
+
+	Object sun;
+	sun.objectName = "Sun";
+	sun.objectTransform = glm::mat4(1.0f); // add position
+	sun.objectTransform = glm::translate(sun.objectTransform, glm::vec3(0, 0, 1));
+	sun.objectColour = glm::vec4(1, 1, 0, 1);
+	renderObject.push_back(sun);
+
+	Object mercury;
+	mercury.objectName = "Mercury";
+	mercury.objectTransform = glm::mat4(1.0f);
+	mercury.objectTransform = glm::translate(mercury.objectTransform, glm::vec3(0, 0, 1));
+	mercury.objectTransform = glm::scale(mercury.objectTransform, glm::vec3(0.1f));
+	mercury.objectColour = glm::vec4(0.1, 0.1, 0.1, 1);
+	renderObject.push_back(mercury);
+
+	Object venus;
+	venus.objectName = "Venus";
+	venus.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	venus.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(venus);
+
+	Object moon;
+	moon.objectName = "Moon";
+	moon.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	moon.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(moon);
+
+	Object mars;
+	mars.objectName = "Mars";
+	mars.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	mars.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(mars);
+
+
+	Object jupiter;
+	jupiter.objectName = "Jupiter";
+	jupiter.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	jupiter.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(jupiter);
+
+	Object saturn;
+	saturn.objectName = "Saturn";
+	saturn.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	saturn.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(saturn);
+
+	Object uranus;
+	uranus.objectName = "Uranus";
+	uranus.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	uranus.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(uranus);
+
+	Object neptune;
+	neptune.objectName = "Neptune";
+	neptune.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	neptune.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(neptune);
+
+	Object pluto;
+	pluto.objectName = "Pluto";
+	pluto.objectTransform = glm::mat4(0.0f); // change, placeholder values
+	pluto.objectColour = glm::vec4(0, 0, 0, 0); // change, placeholder values
+	renderObject.push_back(pluto);
+
+	for (Object& object : renderObject) {
+		auto objectSource = getObjectName(object);
 		Site site = Site::from_GPS(-1.087 * Unit::deg, 50.805 * Unit::deg, 60.0 * Unit::m);
 		EOP eop(37, 0.6447 * Unit::s, 103.2 * Unit::mas, 211.3 * Unit::mas);
 		auto obs = site.to_observer(eop);
@@ -90,7 +171,7 @@ int main() {
 		double objectAltitude = hor.elevation().deg();
 		double objectAzimuth = hor.azimuth().deg();
 
-		cout << objectName << endl;
+		cout << object.objectName << endl;
 		cout << objectAzimuth << endl;
 		cout << objectAltitude	 << endl;
 		cout << objectDistance.km() << " km" << endl;
@@ -126,49 +207,46 @@ int main() {
 
 	glViewport(0, 0, screenWidth, screenHeight);
 
-	float verticesData[] = {
-		//square front face vertices
-			-0.5f, -0.5f, -0.5f,	1.0f, 0.0f, 0.0f,
-			0.5f, -0.5f, -0.5f,		0.0f, 1.0f, 0.0f,
-			-0.5f, 0.5f, -0.5f, 	0.0f, 0.0f, 1.0f,
-			0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 0.0f,
+	for (phi = 0; phi <= 180; phi += 10)
+	{
+		for (theta = 0; theta < 360; theta += 10)
+		{
+			x = (radius * glm::sin(glm::radians(phi)) * glm::cos(glm::radians(theta)));
+			y = (radius * glm::cos(glm::radians(phi)));
+			z = (radius * glm::sin(glm::radians(phi)) * glm::sin(glm::radians(theta)));
+			glm::vec3 position(x, y, z);
+			pointsVector.push_back(position);
+		}
+	}
 
-		//square back face vertices
-			-0.5f, -0.5f, 0.5f,		1.0f, 0.0f, 0.0f,
-			0.5f, -0.5f, 0.5f,		0.0f, 1.0f, 0.0f,
-			-0.5f, 0.5f, 0.5f,		0.0f, 0.0f, 1.0f,
-			0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f
-	}; //cube vertex positions and colour data, x first y second then rbg data
+	for (currentRing = 0; currentRing < 18; currentRing++)
+	{
+		for (currentPoint = 0; currentPoint < 36; currentPoint++)
+		{
+			indexA = (currentRing * 36) + currentPoint;
+			indexB = (currentRing * 36) + (currentPoint + 1) % 36;
+			indexC = ((currentRing + 1) * 36) + currentPoint;
+			indexD = ((currentRing + 1) * 36) + ((currentPoint + 1) % 36);
 
-	unsigned int indices[] = {
+			//indice 1
+			indicesVector.push_back(indexA);
+			indicesVector.push_back(indexB);
+			indicesVector.push_back(indexD);
 
-		0, 2, 3,
-		0, 3, 1, //front
+			//indice 2
+			indicesVector.push_back(indexA);
+			indicesVector.push_back(indexD);
+			indicesVector.push_back(indexC);
 
-		4, 5, 7,
-		4, 7, 6, //back
-
-		0, 4, 6,
-		0, 6, 2, //left
-
-		1, 3, 7,
-		1, 7, 5, //right
-
-		2, 6, 7,
-		2, 7, 3, //top
-
-		0, 1, 5,
-		0, 5, 4, //bottom
-	};
+		}
+	}
 
 	Renderer renderer;
 	Camera camera(glm::vec3(0, 0, 5));
 
-	renderer.Initialize(verticesData, sizeof(verticesData), indices, sizeof(indices));
+	renderer.Initialize(pointsVector.data(), pointsVector.size() * sizeof(glm::vec3), indicesVector.data(), indicesVector.size() * sizeof(unsigned int));
 	
 	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader");
-
-	glm::mat4 trans;
 
 	glm::vec3 position = glm::vec3(0, 0, 5);
 
@@ -178,20 +256,12 @@ int main() {
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
+	glDisable(GL_CULL_FACE);
 
 	//window main loop
 	while (!window.ShouldClose()) {
 
 		renderer.Clear();
-
-		trans = glm::mat4(1.0f); //reset the transform matrix
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-
-		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		unsigned int viewLoc = glGetUniformLocation(shader, "view");
 		camera.UpdateCamera(window.GetNativeWindow(), screenWidth, screenHeight);
@@ -200,7 +270,17 @@ int main() {
 		unsigned int projLoc = glGetUniformLocation(shader, "projection");
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		renderer.Draw(36);
+
+		unsigned int transformLoc = glGetUniformLocation(shader, "transform");
+		unsigned int planetColour = glGetUniformLocation(shader, "planetColour");
+
+
+		for (Object& currentObject : renderObject)
+		{
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(currentObject.objectTransform));
+			glUniform4fv(planetColour, 1, glm::value_ptr(currentObject.objectColour));
+			renderer.Draw(indicesVector.size());
+		}
 
 		window.SwapBuffers();
 		window.PollEvents();

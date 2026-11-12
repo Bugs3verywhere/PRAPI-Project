@@ -1,10 +1,11 @@
 #pragma once
 #include <cstddef>
+#include "glm/glm.hpp"
 
 class Renderer
 {
 	public:
-		void Initialize(const float* verticesData, std::size_t verticesSize, const unsigned int* indices, std::size_t indicesSize);
+		void Initialize(const glm::vec3* verticesData, std::size_t verticesSize, const unsigned int* indices, std::size_t indicesSize);
 		
 		void Draw(unsigned int indexCount);
 
@@ -14,6 +15,6 @@ class Renderer
 
 	private:
 		unsigned int vao = 0;
-		unsigned int vertexBuffer = 0;
-		unsigned int elementBuffer = 0;
+		unsigned int VBO = 0;
+		unsigned int EBO = 0;
 };
