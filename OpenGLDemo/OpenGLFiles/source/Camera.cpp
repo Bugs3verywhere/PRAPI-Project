@@ -60,3 +60,9 @@ float Camera::GetFoV() const
 {
 	return FoV;
 }
+
+void Camera::Zoom(double yOffset)
+{
+	FoV *= static_cast<float>(std::pow(0.9, yOffset));
+	FoV = std::clamp(FoV, 1.0f, 90.0f);
+}

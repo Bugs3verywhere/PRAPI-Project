@@ -9,6 +9,8 @@
 struct ObjectValues
 {
 	std::string objectName;
+	float objectRadius;
+	bool exaggerateRadius = true;
 	glm::mat4 objectTransform;
 	glm::vec4 objectColour;
 };

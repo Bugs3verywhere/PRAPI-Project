@@ -111,14 +111,21 @@ int main() {
 	Renderer renderer;
 	renderer.Initialize(pointsVector.data(), pointsVector.size() * sizeof(glm::vec3), indicesVector.data(), indicesVector.size() * sizeof(unsigned int));
 
-	Camera camera(glm::vec3(0, 0, 5));
+	Camera camera(glm::vec3(0, 0, 0));
+
+	glfwSetWindowUserPointer(window.GetNativeWindow(), &camera);
+	glfwSetScrollCallback(window.GetNativeWindow(), [](GLFWwindow* win, double xOffset, double yOffset)
+	{
+		Camera* cam = static_cast<Camera*>(glfwGetWindowUserPointer(win));
+		if (cam)
+			cam->Zoom(yOffset);
+	});
 	
 	ShaderProgramSource source = ParseShader("OpenGLFiles/shaders/basic.shader");
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
 
 	glm::vec3 position = glm::vec3(0, 0, 5);
-	glm::mat4 projection = glm::perspective(glm::radians(camera.GetFoV()), float(screenWidth) / float(screenHeight), 0.1f, 100.0f);
 
 	glDisable(GL_CULL_FACE);
 
@@ -127,9 +134,13 @@ int main() {
 
 		renderer.Clear();
 
-		unsigned int viewLoc = glGetUniformLocation(shader, "view");
 		camera.UpdateCamera(window.GetNativeWindow(), screenWidth, screenHeight);
+
+		unsigned int viewLoc = glGetUniformLocation(shader, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+
+		glm::mat4 projection = glm::perspective(glm::radians(camera.GetFoV()),
+		float(screenWidth) / float(screenHeight), 0.01f, 10000.0f);
 
 		unsigned int projLoc = glGetUniformLocation(shader, "projection");
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));

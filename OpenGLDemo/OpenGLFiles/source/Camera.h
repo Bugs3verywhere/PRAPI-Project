@@ -23,6 +23,8 @@ class Camera
 
 		float GetFoV() const;
 
+		void Zoom(double yOffset);
+
 		glm::mat4 GetViewMatrix();
 
 };
